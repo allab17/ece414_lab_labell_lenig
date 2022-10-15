@@ -1,0 +1,4 @@
+(sym_lib_table
+  (lib (name "ada_lib")(type "KiCad")(uri "C:/Users/labella/Desktop/KiCad/lab05/ada_lib.kicad_sym")(options "")(descr ""))
+  (lib (name "microstick_2")(type "KiCad")(uri "C:/Users/labella/Desktop/KiCad/lab05/microstick_2.kicad_sym")(options "")(descr ""))
+)
