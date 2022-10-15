@@ -26,6 +26,7 @@
 #include <xc.h>
 #include <plib.h>
 #include "adc_intf.h"
+#include "timer1.h"
 
 // Convenient defines for width and height of display
 #define DW          320
@@ -35,100 +36,79 @@
 //cursor pos
  uint16_t xpos, ypos;
 
-void main()
-{   
-    char buffer[64];
-    uint32_t i, idx;
-    
-    // Turn off analog function of Ports A and B
-    ANSELA = 0; 
-    ANSELB = 0; 
-    
-    // Turn off comparator functions
-    CM1CON = 0; 
-    CM2CON = 0;
-    
-    configureADC();
-    
-    // Initialize TFT
-    //configureADC();
-    tft_init_hw();
-    tft_begin();
-    tft_setRotation(4);  // Landscape mode.  Use 1 for portrait.
-    tft_fillScreen(ILI9341_BLACK);
+const uint16_t x_ref = 40;  //first column to scale the calculator buttons
+const uint16_t y_ref = 200;
 
-    idx = 0;
-    
-    while (1)
-    {   
-        tft_setTextColor(ILI9341_WHITE);  tft_setTextSize(2);
-        draw_buttons();
-        
-        if (ts_lcd_get_ts(&xpos, &ypos)) {  
-            //if the user has pressed screen
-            ts_lcd_get_ts(&xpos, &ypos);
-            tft_setCursor(xpos, ypos);
-            tft_drawLine(xpos-5, ypos, xpos+5, ypos, 255);
-            tft_drawLine(xpos, ypos-5, xpos, ypos+5, 255);
-            //tft_setCursor(0,0);
-            //sprintf(buffer, "(%d, %d)", x, y);
-            //tft_writeString(buffer);
-        }
-//        } else {
-//            tft_setCursor(x, y);
-//            tft_drawLine(x-5, y, x+5, y, 100);
-//            tft_drawLine(x, y-5, x, y+5, 100);
-//            //tft_setCursor(0,0);
-//            //sprintf(buffer, "(%d, %d)", x, y);
-//            //tft_writeString(buffer);
-//        } 
-        //tft_fillRoundRect(0,0,50,50,50,ILI9341_BLACK);
-        //delay_ms(400);
-        
-        
-        //tft_fillScreen(ILI9341_BLACK);
-    }    
-    
+const uint16_t btn_s_w = 40;
+const uint16_t btn_s_h = 40;
+
+uint16_t btn_clr_x;
+uint16_t btn_clr_y;
+uint16_t btn_0_x;
+uint16_t btn_0_y;
+uint16_t btn_eq_x;
+uint16_t btn_eq_y;
+uint16_t btn_1_x;
+uint16_t btn_1_y;
+uint16_t btn_2_x;
+uint16_t btn_2_y;
+uint16_t btn_3_x;
+uint16_t btn_3_y;
+uint16_t btn_4_x;
+uint16_t btn_4_y;
+uint16_t btn_5_x;
+uint16_t btn_5_y;
+uint16_t btn_6_x;
+uint16_t btn_6_y;
+uint16_t btn_7_x;
+uint16_t btn_7_y;
+uint16_t btn_8_x;
+uint16_t btn_8_y;
+uint16_t btn_9_x;
+uint16_t btn_9_y;
+uint16_t btn_div_x;
+uint16_t btn_div_y;
+uint16_t btn_mul_x;
+uint16_t btn_mul_y;
+uint16_t btn_sub_x;
+uint16_t btn_sub_y;
+uint16_t btn_add_x;
+uint16_t btn_add_y;
+
+void init_button_dim() {
+    btn_clr_x = x_ref;
+    btn_clr_y = y_ref;
+    btn_0_x = x_ref + btn_s_w;
+    btn_0_y = y_ref;
+    btn_eq_x = x_ref + 2*btn_s_w;
+    btn_eq_y = y_ref;
+    btn_1_x = x_ref;
+    btn_1_y = y_ref - btn_s_h;  
+btn_2_x = x_ref + btn_s_w;
+ btn_2_y = y_ref - btn_s_h;
+ btn_3_x = x_ref + 2*btn_s_w;
+ btn_3_y = y_ref - btn_s_h;
+btn_4_x = x_ref;
+ btn_4_y = y_ref - 2*btn_s_h;
+btn_5_x = x_ref + btn_s_w;
+btn_5_y = y_ref - 2*btn_s_h;
+ btn_6_x = x_ref + 2*btn_s_w;
+ btn_6_y = y_ref - 2*btn_s_h;
+ btn_7_x = x_ref;
+ btn_7_y = y_ref - 3*btn_s_h;
+ btn_8_x = x_ref + btn_s_w;
+ btn_8_y = y_ref - 3*btn_s_h;
+btn_9_x = x_ref + 2*btn_s_w;
+ btn_9_y = y_ref - 3*btn_s_h;
+ btn_div_x = x_ref + 3*btn_s_w;
+ btn_div_y = y_ref;
+ btn_mul_x = x_ref + 3*btn_s_w;
+btn_mul_y = y_ref - btn_s_h;
+ btn_sub_x = x_ref + 3*btn_s_w;
+ btn_sub_y = y_ref - 2*btn_s_h;
+btn_add_x = x_ref + 3*btn_s_w;
+ btn_add_y = y_ref - 3*btn_s_h;
 }
-
-uint16_t x_ref = 40;  //first column to scale the calculator buttons
-uint16_t y_ref = 250;
-
-uint16_t btn_s_w = 40;
-uint16_t btn_s_h = 40;
-
-uint16_t btn_clr_x = x_ref;
-uint16_t btn_clr_y = y_ref;
-uint16_t btn_0_x = x_ref + btn_s_w;
-uint16_t btn_0_y = y_ref;
-uint16_t btn_eq_x = x_ref + 2*btn_s_w;
-uint16_t btn_eq_y = y_ref;
-uint16_t btn_1_x = x_ref;
-uint16_t btn_1_y = y_ref - btn_s_h;
-uint16_t btn_2_x = x_ref + btn_s_w;
-uint16_t btn_2_y = y_ref - btn_s_h;
-uint16_t btn_3_x = x_ref + 2*btn_s_w;
-uint16_t btn_3_y = y_ref - btn_s_h;
-uint16_t btn_4_x = x_ref;
-uint16_t btn_4_y = y_ref - 2*btn_s_h;
-uint16_t btn_5_x = x_ref + btn_s_w;
-uint16_t btn_5_y = y_ref - 2*btn_s_h;
-uint16_t btn_6_x = x_ref + 2*btn_s_w;
-uint16_t btn_6_y = y_ref - 2*btn_s_h;
-uint16_t btn_7_x = x_ref;
-uint16_t btn_7_y = y_ref - 3*btn_s_h;
-uint16_t btn_8_x = x_ref + btn_s_w;
-uint16_t btn_8_y = y_ref - 3*btn_s_h;
-uint16_t btn_9_x = x_ref + 2*btn_s_w;
-uint16_t btn_9_y = y_ref - 3*btn_s_h;
-uint16_t btn_div_x = x_ref + 3*btn_s_w;
-uint16_t btn_div_y = y_ref;
-uint16_t btn_mul_x = x_ref + 3*btn_s_w;
-uint16_t btn_mul_y = y_ref - btn_s_h;
-uint16_t btn_sub_x = x_ref + 3*btn_s_w;
-uint16_t btn_sub_y = y_ref - 2*btn_s_h;
-uint16_t btn_add_x = x_ref + 3*btn_s_w;
-uint16_t btn_add_y = y_ref - 3*btn_s_h;
 
 void draw_buttons() {
     tft_drawRect(btn_clr_x, btn_clr_y, btn_s_w, btn_s_h, ILI9341_WHITE);
@@ -199,12 +179,6 @@ int32_t r = 1; //result
 
 char display_str[100];
 
-
-
-void btn_listener() { //button listener
-    ts_lcd_get_ts(&xpos, &ypos); //x and y will be updated with the touch pos
-    flag_button();
-}
 
 uint8_t btn_operand_listener() {
     if (btn_0 || btn_1 || btn_2 || btn_3 || btn_4 || btn_5 || btn_6 || btn_7 || btn_8 || btn_9) return 1;
@@ -277,6 +251,21 @@ void flag_button() { //returns a number corresponding to the button that can be 
         }
 }
 
+void btn_listener() { //button listener
+    if (ts_lcd_get_ts(&xpos, &ypos)) { //if there is pressure on the screen
+            ts_lcd_get_ts(&xpos, &ypos); //x and y will be updated with the touch pos
+            flag_button();
+    }
+}
+
+uint8_t add_flag = 0;
+uint8_t sub_flag = 0;
+uint8_t mul_flag = 0;
+uint8_t div_flag = 0;
+
+uint8_t first_val = 0;
+
+
 
 
 static enum calc_fsm_states {idle, enter_operand, op_mul, op_div, op_add, op_sub, result, clear, error} calc_state;
@@ -289,111 +278,300 @@ void tick_calc() {
                 calc_state = enter_operand;
                 set_val(); //set the value corresponding to the operand
                 curr_val = val;
+                deflag_operand();
+                
+                //write value to calc screen
+                //clear previous value using fillrect
+                tft_fillRect(0,0,100,100, ILI9341_BLACK);
+                tft_setCursor(0,0);
+                char curr_val_str[50];
+                sprintf(curr_val_str, "%d", curr_val);
+                strcat(display_str,curr_val_str);
+                tft_writeString(display_str);
             }
             break;
-        case enter_operand:
-            deflag_operand(); //deflag all operand flags
-            tft_setCursor(0,0);
-            char curr_val_str[50];
-            sprintf(curr_val_str, "%d", curr_val);
-            strcat(display_str,curr_val_str);
-            tft_writeString(display_str);
             
+        case enter_operand:
             if (btn_clr) calc_state = clear;
-            else if (btn_eq) calc_state = result;
-            else if (btn_mul) {
+            else if (btn_eq) {
+                if (add_flag) {
+                    r = r + curr_val;
+                    add_flag = 0;
+                } else if (sub_flag) {
+                    r = r - curr_val;
+                    sub_flag = 0;
+                } else if (mul_flag) {
+                    r = r * curr_val;
+                    mul_flag = 0;
+                } else if (div_flag) {
+                    r = r / curr_val;
+                    div_flag = 0;
+                }
+                
+                calc_state = result;
+            } else if (btn_mul) {
                 calc_state = op_mul;
-                char curr_val_str[50];
-                //convert the cur_val to string
-                sprintf(curr_val_str, "%d*", curr_val);
-                strcat(display_str,curr_val_str); //string concatenation
+                
+                if (!first_val) {
+                     r = curr_val;
+                     first_val=1;
+                 }
+                
+                if (add_flag) {
+                    r = r + curr_val;
+                    add_flag = 0;
+                } else if (sub_flag) {
+                    r = r - curr_val;
+                    sub_flag = 0;
+                } else if (mul_flag) {
+                    r = r * curr_val;
+                    mul_flag = 0;
+                } else if (div_flag) {
+                    r = r / curr_val;
+                    div_flag = 0;
+                }
+                
+                //write to calc screen
+                //clear previous value using fillrect
+                tft_fillRect(0,0,100,100, ILI9341_BLACK);
+                tft_setCursor(0,0);
+                strcat(display_str,"*"); //string concatenation
+                tft_writeString(display_str);
             }
             else if (btn_div) {
                 calc_state = op_div;
-                char curr_val_str[50];
-                //convert the cur_val to string
-                sprintf(curr_val_str, "%d/", curr_val);
-                strcat(display_str,curr_val_str); //string concatenation
+                
+                 if (!first_val) {
+                     r = curr_val;
+                     first_val=1;
+                 }
+                
+                if (add_flag) {
+                    r = r + curr_val;
+                    add_flag = 0;
+                } else if (sub_flag) {
+                    r = r - curr_val;
+                    sub_flag = 0;
+                } else if (mul_flag) {
+                    r = r * curr_val;
+                    mul_flag = 0;
+                } else if (div_flag) {
+                    r = r / curr_val;
+                    div_flag = 0;
+                }
+                
+                //write to calc screen
+                //clear previous value using fillrect
+                tft_fillRect(0,0,100,100, ILI9341_BLACK);
+                tft_setCursor(0,0);
+                strcat(display_str,"/"); //string concatenation
+                tft_writeString(display_str);
             }
             else if (btn_add) {
                 calc_state = op_add;
-                char curr_val_str[50];
-                //convert the cur_val to string
-                sprintf(curr_val_str, "%d+", curr_val);
-                strcat(display_str,curr_val_str); //string concatenation
+                
+                 if (!first_val) {
+                     r = curr_val;
+                     first_val=1;
+                 }
+                
+                if (add_flag) {
+                    r = r + curr_val;
+                    add_flag = 0;
+                } else if (sub_flag) {
+                    r = r - curr_val;
+                    sub_flag = 0;
+                } else if (mul_flag) {
+                    r = r * curr_val;
+                    mul_flag = 0;
+                } else if (div_flag) {
+                    r = r / curr_val;
+                    div_flag = 0;
+                }
+                
+                //write to calc screen
+                //clear previous value using fillrect
+                tft_fillRect(0,0,100,100, ILI9341_BLACK);
+                tft_setCursor(0,0);
+                strcat(display_str,"+"); //string concatenation
+                tft_writeString(display_str);
             }
             else if (btn_sub) {
                 calc_state = op_sub;
-                char curr_val_str[50];
-                //convert the cur_val to string
-                sprintf(curr_val_str, "%d-", curr_val);
-                //string concatenation
-                strcat(display_str,curr_val_str);
+                
+                 if (!first_val) {
+                     r = curr_val;
+                     first_val=1;
+                 }
+                
+                if (add_flag) {
+                    r = r + curr_val;
+                    add_flag = 0;
+                } else if (sub_flag) {
+                    r = r - curr_val;
+                    sub_flag = 0;
+                } else if (mul_flag) {
+                    r = r * curr_val;
+                    mul_flag = 0;
+                } else if (div_flag) {
+                    r = r / curr_val;
+                    div_flag = 0;
+                }
+                
+                //write to calc screen
+                //clear previous value using fillrect
+                tft_fillRect(0,0,100,100, ILI9341_BLACK);
+                tft_setCursor(0,0);
+                strcat(display_str,"-"); //string concatenation
+                tft_writeString(display_str);
             } else if (btn_operand_listener()) {
+                calc_state = enter_operand;
                 set_val(); //set the value corresponding to the operand
                 curr_val = curr_val * 10 + val;
-                calc_state = enter_operand;
-            }
+                deflag_operand();
+                
+                //write value to calc screen
+                //clear previous value using fillrect
+                tft_fillRect(0,0,100,100, ILI9341_BLACK);
+                tft_setCursor(0,0);
+                char curr_val_str[50];
+                sprintf(curr_val_str, "%d", curr_val);
+                strcat(display_str,curr_val_str);
+                tft_writeString(display_str);
+            } else calc_state = enter_operand;
             break;
         case op_mul:
-            r = r * curr_val;
             btn_mul = 0;
+            mul_flag=1;
+            
             if (btn_clr) calc_state = clear;
-            else calc_state = enter_operand;
+            else calc_state = idle;
             break;
         case op_div:
-            if (curr_val == 0) {
-                err = 2;
-            } else {
-                r = r / curr_val;
-            }
             btn_div = 0;
+            div_flag=1;
+            
             if (btn_clr) calc_state = clear;
-            else if (curr_val == 0) calc_state = error;
-            else calc_state = enter_operand;
+            else calc_state = idle;
             break;
         case op_add:
-            r = r + curr_val;
             btn_add = 0;
+            add_flag=1;
+            
             if (btn_clr) calc_state = clear;
-            else calc_state = enter_operand;
+            else calc_state = idle;
             break;
         case op_sub:
-            r = r - curr_val;
             btn_sub = 0;
+            sub_flag=1;
+            
             if (btn_clr) calc_state = clear;
-            else calc_state = enter_operand;
+            else calc_state = idle;
             break;
         case clear :
+            btn_clr = 0;
+            //write to calc screen
+            //clear previous value using fillrect
+            tft_fillRect(0,0,100,100, ILI9341_BLACK);
+            tft_setCursor(0,0);
             tft_writeString("0");
             calc_state = idle;
             break;
         case error:
-            if (err == 1) tft_writeString("ERROR");
-            else tft_writeString("DIV0");
-            
-            if (btn_clr) calc_state = clear;
-            else calc_state = error;
+//            if (err == 1) tft_writeString("ERROR");
+//            else tft_writeString("DIV0");
+//            
+//            if (btn_clr) calc_state = clear;
+//            else 
+            calc_state = idle;
             break;
-        case result:
-            if (r > 2147483647 || r < 2147483647) err = 1;
-            else if (r < 0) {
-                char r_str[100];
-                //convert the cur_val to string
-                sprintf(r_str, "-%d", r);
-                tft_writeString(r_str);
-            } else {
+        case result: 
+            btn_eq = 0;
+            
+            //if (r > 2147483647 || r < 2147483647) err = 1;
+//            if (r < 0) {
+                //write to calc screen
+                   //clear previous value using fillrect
+                tft_fillRect(0,0,100,100, ILI9341_BLACK);
+                tft_setCursor(0,0);  
+                tft_setTextColor(ILI9341_RED);
                 char r_str[100];
                 //convert the cur_val to string
                 sprintf(r_str, "%d", r);
                 tft_writeString(r_str);
-            }
+//            } else {
+//                char r_str[100];
+//                //convert the cur_val to string
+//                sprintf(r_str, "%d", r);
+//                tft_writeString(r_str);
+//            }
             
-            if (err = 1) calc_state = error;
-            else if (btn_clr) calc_state = clear;
-            else calc_state = result;
+//            if (err = 1) calc_state = error;
+//            else if (btn_clr) calc_state = clear;
+//            else 
+            calc_state = idle;
             break;
     }
+    
+}
+
+
+void main()
+{   
+    // Turn off analog function of Ports A and B
+    ANSELA = 0; 
+    ANSELB = 0; 
+    
+    // Turn off comparator functions
+    CM1CON = 0; 
+    CM2CON = 0;
+    
+    configureADC();
+    
+    // Initialize TFT
+    //configureADC();
+    tft_init_hw();
+    tft_begin();
+    tft_setRotation(4);  // Landscape mode.  Use 1 for portrait.
+    tft_fillScreen(ILI9341_BLACK);
+ 
+    const uint16_t PERIOD_CALC = 100;
+    uint16_t ta1, ta2;
+    timer1_init();
+    ta1 = timer1_read();
+    init_button_dim();
+    while (1)
+    {   
+        ta2 = timer1_read();
+        
+        tft_setTextColor(ILI9341_WHITE);  tft_setTextSize(2);
+        draw_buttons();
+        
+        if (timer1_ms_elapsed(ta1, ta2) >= PERIOD_CALC) {
+            ta1 = ta2;
+            tick_calc();
+        }
+        
+        
+        
+        
+        
+        //part I
+//        if (ts_lcd_get_ts(&xpos, &ypos)) {  
+//            //if the user has pressed screen
+//            ts_lcd_get_ts(&xpos, &ypos);
+//            tft_setCursor(xpos, ypos);
+//            tft_drawLine(xpos-5, ypos, xpos+5, ypos, 255);
+//            tft_drawLine(xpos, ypos-5, xpos, ypos+5, 255);
+//            tft_setCursor(0,0);
+//            sprintf(buffer, "(%d, %d)", x, y);
+//            tft_writeString(buffer);
+//        }
+        //delay_ms(400);
+        
+        
+        //tft_fillScreen(ILI9341_BLACK);
+    }    
     
 }
 
