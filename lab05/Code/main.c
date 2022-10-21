@@ -258,12 +258,15 @@ uint8_t btn_listener() { //button listener
     } else return 0;
 }
 
-uint8_t add_flag = 0;
+uint8_t add_flag = 0;  //to identify what operation should be done
 uint8_t sub_flag = 0;
 uint8_t mul_flag = 0;
 uint8_t div_flag = 0;
 
-uint8_t first_val = 0;
+uint8_t r_flag = 0;  //to only print the result one time when in the result state
+uint8_t err_flag = 0;   //to only print error one time when in error state
+
+uint8_t first_val = 0;  //set the first value of r
 
 static enum DEBP1_States {DEBP1_NOPUSH, DEBP1_MAYBENOPUSH, DEBP1_MAYBEPUSH, DEBP1_PUSHED} DEBP1_state;
 
@@ -309,12 +312,33 @@ void tickFct_DEBP1() {
     }
 }
 
+void exe_op() {
+    if (!first_val) {
+        r = curr_val;
+        first_val=1;
+    } else {
+    if (add_flag) {
+        r = r + curr_val;
+        add_flag = 0;
+    } else if (sub_flag) {
+        r = r - curr_val;
+        sub_flag = 0;
+    } else if (mul_flag) {
+        r = r * curr_val;
+        mul_flag = 0;
+    } else if (div_flag) {
+        if (curr_val == 0) {
+             err = 1;
+        } else {
+            r = r / curr_val;
+        }
+        div_flag = 0;
+    }
+  }
+}
 
-static enum calc_fsm_states {idle, enter_operand, op_mul, op_div, op_add, op_sub, result, clear, error} calc_state;
 
-
-uint8_t r_flag = 0;
-uint8_t err_flag = 0;
+static enum calc_fsm_states {idle, enter_operand, result, clear, error} calc_state;
 
 void tick_calc() {
     switch (calc_state) {
@@ -342,9 +366,10 @@ void tick_calc() {
                 err = 2;
                 calc_state = error;
             } else if (btn_clr) { 
+                btn_clr=0;
                 calc_state = clear; 
             } else if (btn_operand_listener()) {
-                set_val(); //set the value corresponding to the operand
+                    set_val(); //set the value corresponding to the operand
                     char curr_val_p_str[50];
                     sprintf(curr_val_p_str, "%d", curr_val);
                     //get length of current value string and deconcatenate by the length of the curr_val_s from the end of display_str
@@ -368,56 +393,17 @@ void tick_calc() {
                     calc_state = enter_operand;  
             } else if (btn_eq) {
                 btn_eq=0;
-                if (!first_val) {
-                     r = curr_val;
-                     first_val=1;
-                } else {
-                    if (add_flag) {
-                        r = r + curr_val;
-                        add_flag = 0;
-                    } else if (sub_flag) {
-                        r = r - curr_val;
-                        sub_flag = 0;
-                    } else if (mul_flag) {
-                        r = r * curr_val;
-                        mul_flag = 0;
-                    } else if (div_flag) {
-                        if (curr_val == 0) {
-                            err = 1;
-                        } else {
-                            r = r / curr_val;
-                        }
-                        div_flag = 0;
-                    }
-                }
+                exe_op();
                 
                 if (err) calc_state = error;
-                else calc_state = result;
+                else if (btn_clr) {
+                    btn_clr=0; 
+                    calc_state=clear;
+                } else calc_state = result;
                 
             } else if (btn_mul) {
                 btn_mul=0;
-                if (!first_val) {
-                     r = curr_val;
-                     first_val=1;
-                } else {
-                    if (add_flag) {
-                        r = r + curr_val;
-                        add_flag = 0;
-                    } else if (sub_flag) {
-                        r = r - curr_val;
-                        sub_flag = 0;
-                    } else if (mul_flag) {
-                        r = r * curr_val;
-                        mul_flag = 0;
-                    } else if (div_flag) {
-                        if (curr_val == 0) {
-                            err = 1;
-                        } else {
-                            r = r / curr_val;
-                        }
-                        div_flag = 0;
-                    }
-                }
+                exe_op();
                 
                 char r_str[100];
                     //convert the cur_val to string
@@ -434,32 +420,17 @@ void tick_calc() {
                 tft_writeString(display_str);
                 
                 if (err) calc_state = error;
-                else calc_state = op_mul;
+                else if (btn_clr) {
+                    btn_clr=0; 
+                    calc_state=clear;
+                } else {
+                    calc_state = idle;
+                    mul_flag=1;
+                }
             }
             else if (btn_div) {
                 btn_div=0;
-                 if (!first_val) {
-                     r = curr_val;
-                     first_val=1;
-                } else {
-                    if (add_flag) {
-                        r = r + curr_val;
-                        add_flag = 0;
-                    } else if (sub_flag) {
-                        r = r - curr_val;
-                        sub_flag = 0;
-                    } else if (mul_flag) {
-                        r = r * curr_val;
-                        mul_flag = 0;
-                    } else if (div_flag) {
-                        if (curr_val == 0) {
-                            err = 1;
-                        } else {
-                            r = r / curr_val;
-                        }
-                        div_flag = 0;
-                    }
-                }
+                exe_op();
                  
                  char r_str[100];
                     //convert the cur_val to string
@@ -476,32 +447,17 @@ void tick_calc() {
                 tft_writeString(display_str);
                 
                 if (err) calc_state = error;
-                else calc_state = op_div;
+                else if (btn_clr) {
+                    btn_clr=0; 
+                    calc_state=clear;
+                } else {
+                    calc_state = idle;
+                    div_flag=1;
+                }
             }
             else if (btn_add) {
                 btn_add=0;
-                 if (!first_val) {
-                     r = curr_val;
-                     first_val=1;
-                } else {
-                    if (add_flag) {
-                        r = r + curr_val;
-                        add_flag = 0;
-                    } else if (sub_flag) {
-                        r = r - curr_val;
-                        sub_flag = 0;
-                    } else if (mul_flag) {
-                        r = r * curr_val;
-                        mul_flag = 0;
-                    } else if (div_flag) {
-                        if (curr_val == 0) {
-                            err = 1;
-                        } else {
-                            r = r / curr_val;
-                        }
-                        div_flag = 0;
-                    }
-                }
+                exe_op();
                  
                  char r_str[100];
                     //convert the cur_val to string
@@ -518,32 +474,17 @@ void tick_calc() {
                 tft_writeString(display_str);
                 
                 if (err) calc_state = error;
-                else calc_state = op_add;
+                else if (btn_clr) {
+                    btn_clr=0; 
+                    calc_state=clear;
+                } else  {
+                    calc_state = idle;
+                    add_flag=1;
+                }
             }
             else if (btn_sub) {
                 btn_sub=0;
-                 if (!first_val) {
-                     r = curr_val;
-                     first_val=1;
-                } else {
-                    if (add_flag) {
-                        r = r + curr_val;
-                        add_flag = 0;
-                    } else if (sub_flag) {
-                        r = r - curr_val;
-                        sub_flag = 0;
-                    } else if (mul_flag) {
-                        r = r * curr_val;
-                        mul_flag = 0;
-                    } else if (div_flag) {
-                        if (curr_val == 0) {
-                            err = 1;
-                        } else {
-                            r = r / curr_val;
-                        }
-                        div_flag = 0;
-                    }
-                }
+                exe_op();
                  
                     char r_str[100];
                     //convert the cur_val to string
@@ -560,37 +501,16 @@ void tick_calc() {
                 tft_writeString(display_str);
                 
                 if (err) calc_state = error;
-                else calc_state = op_sub;
-                
-                
+                else if (btn_clr) {
+                    btn_clr=0; 
+                    calc_state=clear;
+                } else {
+                    calc_state = idle;
+                    sub_flag=1;
+                }
             } else calc_state = enter_operand;
             break;
-        case op_mul:
-            mul_flag=1;
-            
-            if (btn_clr) calc_state = clear;
-            else calc_state = idle;
-            break;
-        case op_div:
-            div_flag=1;
-            
-            if (btn_clr) calc_state = clear;
-            else calc_state = idle;
-            break;
-        case op_add:
-            add_flag=1;
-            
-            if (btn_clr) calc_state = clear;
-            else calc_state = idle;
-            break;
-        case op_sub:
-            sub_flag=1;
-            
-            if (btn_clr) calc_state = clear;
-            else calc_state = idle;
-            break;
         case clear :
-            btn_clr = 0;
             r=0;
             curr_val = 0;
             first_val = 0;
@@ -605,48 +525,57 @@ void tick_calc() {
             calc_state = idle;
             break;
         case error:
-            if (!err_flag) {
-                display_str[0] = '\0';
-                tft_setCursor(0,0);
-                tft_drawRect(0,0,300,50,ILI9341_BLACK);
-                tft_fillRect(0,0,300,50,ILI9341_BLACK);
-                tft_setTextColor(ILI9341_RED);
-                if (err == 2) { tft_writeString("ERROR"); }
-                else  tft_writeString("DIV0");
-                err_flag = 1;
-            }
-            err = 0;
-            if (btn_clr) { err_flag = 0;  calc_state = clear; }
-            else calc_state = error;
-            break;
-        case result: 
-                if (!r_flag) {
-                    if (r > 100000000 || r < -100000000) {
-                    err = 2;
-                } else {
+            if (btn_clr) {
+                btn_clr = 0; 
+                err_flag = 0;  
+                err = 0;
+                calc_state = clear; 
+            } else {
+                if (!err_flag) {
                     display_str[0] = '\0';
-                    tft_writeString(display_str);
-                    //write to calc screen
-                    tft_setCursor(0,0); 
+                    tft_setCursor(0,0);
                     tft_drawRect(0,0,300,50,ILI9341_BLACK);
                     tft_fillRect(0,0,300,50,ILI9341_BLACK);
                     tft_setTextColor(ILI9341_RED);
-                    char r_str[100];
-                    //convert the cur_val to string
-                    sprintf(r_str, "%d", r);
-                    tft_writeString(r_str);
+                    if (err == 2) { tft_writeString("ERROR"); }
+                    else  tft_writeString("DIV0");
+                    err_flag = 1;
                 }
-                    r_flag = 1;   
-                }
-            
-            first_val = 0;
-            if (err == 2) calc_state = error;
-            else if (btn_clr) { r_flag = 0; calc_state = clear; }
-            else calc_state = result;
+                calc_state = error;
+            }
+            break;
+        case result:
+                if (r > 100000000 || r < -100000000) {
+                    err = 2;
+                    calc_state = error;
+                } else if (btn_clr) { 
+                    btn_clr=0;
+                    r_flag = 0; 
+                    calc_state = clear; 
+                } else {
+                    if (!r_flag) {
+                        display_str[0] = '\0';
+                        tft_writeString(display_str);
+                        //write to calc screen
+                        tft_setCursor(0,0); 
+                        tft_drawRect(0,0,300,50,ILI9341_BLACK);
+                        tft_fillRect(0,0,300,50,ILI9341_BLACK);
+                        tft_setTextColor(ILI9341_RED);
+                        char r_str[100];
+                        //convert the cur_val to string
+                        sprintf(r_str, "%d", r);
+                        tft_writeString(r_str);
+                        r_flag = 1;   
+                    }
+                    calc_state = result;
+                }  
+                    
             break;
     }
     
 }
+
+
 
 
 void main()
