@@ -112,37 +112,37 @@ btn_add_x = x_ref + 3*btn_s_w;
 
 void draw_buttons() {
     tft_drawRect(btn_clr_x, btn_clr_y, btn_s_w, btn_s_h, ILI9341_WHITE);
-    tft_drawChar(btn_clr_x, btn_clr_y, 'c', ILI9341_WHITE, ILI9341_BLACK, 2);
+    tft_drawChar(btn_clr_x + 0.42*btn_s_w, btn_clr_y + 0.34*btn_s_h, 'c', ILI9341_WHITE, ILI9341_BLACK, 2);
     tft_drawRect(btn_0_x, btn_0_y, btn_s_w, btn_s_h, ILI9341_WHITE);
-    tft_drawChar(btn_0_x, btn_0_y, '0', ILI9341_WHITE, ILI9341_BLACK, 2);
+    tft_drawChar(btn_0_x + 0.42*btn_s_w, btn_0_y + 0.34*btn_s_h, '0', ILI9341_WHITE, ILI9341_BLACK, 2);
     tft_drawRect(btn_eq_x, btn_eq_y, btn_s_w, btn_s_h, ILI9341_WHITE);
-    tft_drawChar(btn_eq_x, btn_eq_y, '=', ILI9341_WHITE, ILI9341_BLACK, 2);
+    tft_drawChar(btn_eq_x + 0.42*btn_s_w, btn_eq_y + 0.34*btn_s_h, '=', ILI9341_WHITE, ILI9341_BLACK, 2);
     tft_drawRect(btn_1_x, btn_1_y, btn_s_w, btn_s_h, ILI9341_WHITE);
-    tft_drawChar(btn_1_x, btn_1_y, '1', ILI9341_WHITE, ILI9341_BLACK, 2);
+    tft_drawChar(btn_1_x + 0.42*btn_s_w, btn_1_y + 0.34*btn_s_h, '1', ILI9341_WHITE, ILI9341_BLACK, 2);
     tft_drawRect(btn_2_x, btn_2_y, btn_s_w, btn_s_h, ILI9341_WHITE);
-    tft_drawChar(btn_2_x, btn_2_y, '2', ILI9341_WHITE, ILI9341_BLACK, 2);
+    tft_drawChar(btn_2_x + 0.42*btn_s_w, btn_2_y + 0.34*btn_s_h, '2', ILI9341_WHITE, ILI9341_BLACK, 2);
     tft_drawRect(btn_3_x, btn_3_y, btn_s_w, btn_s_h, ILI9341_WHITE);
-    tft_drawChar(btn_3_x, btn_3_y, '3', ILI9341_WHITE, ILI9341_BLACK, 2);
+    tft_drawChar(btn_3_x + 0.42*btn_s_w, btn_3_y + 0.34*btn_s_h, '3', ILI9341_WHITE, ILI9341_BLACK, 2);
     tft_drawRect(btn_4_x, btn_4_y, btn_s_w, btn_s_h, ILI9341_WHITE);
-    tft_drawChar(btn_4_x, btn_4_y, '4', ILI9341_WHITE, ILI9341_BLACK, 2);
+    tft_drawChar(btn_4_x + 0.42*btn_s_w, btn_4_y + 0.34*btn_s_h, '4', ILI9341_WHITE, ILI9341_BLACK, 2);
     tft_drawRect(btn_5_x, btn_5_y, btn_s_w, btn_s_h, ILI9341_WHITE);
-    tft_drawChar(btn_5_x, btn_5_y, '5', ILI9341_WHITE, ILI9341_BLACK, 2);
+    tft_drawChar(btn_5_x + 0.42*btn_s_w, btn_5_y + 0.34*btn_s_h, '5', ILI9341_WHITE, ILI9341_BLACK, 2);
     tft_drawRect(btn_6_x, btn_6_y, btn_s_w, btn_s_h, ILI9341_WHITE);
-    tft_drawChar(btn_6_x, btn_6_y, '6', ILI9341_WHITE, ILI9341_BLACK, 2);
+    tft_drawChar(btn_6_x + 0.42*btn_s_w, btn_6_y + 0.34*btn_s_h, '6', ILI9341_WHITE, ILI9341_BLACK, 2);
     tft_drawRect(btn_7_x, btn_7_y, btn_s_w, btn_s_h, ILI9341_WHITE);
-    tft_drawChar(btn_7_x, btn_7_y, '7', ILI9341_WHITE, ILI9341_BLACK, 2);
+    tft_drawChar(btn_7_x + 0.42*btn_s_w, btn_7_y + 0.34*btn_s_h, '7', ILI9341_WHITE, ILI9341_BLACK, 2);
     tft_drawRect(btn_8_x, btn_8_y, btn_s_w, btn_s_h, ILI9341_WHITE);
-    tft_drawChar(btn_8_x, btn_8_y, '8', ILI9341_WHITE, ILI9341_BLACK, 2);
+    tft_drawChar(btn_8_x + 0.42*btn_s_w, btn_8_y + 0.34*btn_s_h, '8', ILI9341_WHITE, ILI9341_BLACK, 2);
     tft_drawRect(btn_9_x, btn_9_y, btn_s_w, btn_s_h, ILI9341_WHITE);
-    tft_drawChar(btn_9_x, btn_9_y, '9', ILI9341_WHITE, ILI9341_BLACK, 2);
+    tft_drawChar(btn_9_x + 0.42*btn_s_w, btn_9_y + 0.34*btn_s_h, '9', ILI9341_WHITE, ILI9341_BLACK, 2);
     tft_drawRect(btn_div_x, btn_div_y, btn_s_w, btn_s_h, ILI9341_WHITE);
-    tft_drawChar(btn_div_x, btn_div_y, '/', ILI9341_WHITE, ILI9341_BLACK, 2);
+    tft_drawChar(btn_div_x + 0.42*btn_s_w, btn_div_y + 0.34*btn_s_h, '/', ILI9341_WHITE, ILI9341_BLACK, 2);
     tft_drawRect(btn_mul_x, btn_mul_y, btn_s_w, btn_s_h, ILI9341_WHITE);
-    tft_drawChar(btn_mul_x, btn_mul_y, '*', ILI9341_WHITE, ILI9341_BLACK, 2);
+    tft_drawChar(btn_mul_x + 0.42*btn_s_w, btn_mul_y + 0.34*btn_s_h, '*', ILI9341_WHITE, ILI9341_BLACK, 2);
     tft_drawRect(btn_sub_x, btn_sub_y, btn_s_w, btn_s_h, ILI9341_WHITE);
-    tft_drawChar(btn_sub_x, btn_sub_y, '-', ILI9341_WHITE, ILI9341_BLACK, 2);
+    tft_drawChar(btn_sub_x + 0.42*btn_s_w, btn_sub_y + 0.34*btn_s_h, '-', ILI9341_WHITE, ILI9341_BLACK, 2);
     tft_drawRect(btn_add_x, btn_add_y, btn_s_w, btn_s_h, ILI9341_WHITE);
-    tft_drawChar(btn_add_x, btn_add_y, '+', ILI9341_WHITE, ILI9341_BLACK, 2);
+    tft_drawChar(btn_add_x + 0.42*btn_s_w, btn_add_y + 0.34*btn_s_h, '+', ILI9341_WHITE, ILI9341_BLACK, 2);
 }
 
 
@@ -251,11 +251,11 @@ void flag_button(uint16_t xpos, uint16_t ypos) { //returns a number correspondin
         }
 }
 
-void btn_listener() { //button listener
+uint8_t btn_listener() { //button listener
     if (ts_lcd_get_ts(&xpos, &ypos)) { //if there is pressure on the screen
             ts_lcd_get_ts(&xpos, &ypos); //x and y will be updated with the touch pos
-            flag_button(xpos,ypos);
-    }
+            return 1;
+    } else return 0;
 }
 
 uint8_t add_flag = 0;
@@ -265,49 +265,49 @@ uint8_t div_flag = 0;
 
 uint8_t first_val = 0;
 
-//static enum DEBP1_States {DEBP1_NOPUSH, DEBP1_MAYBENOPUSH, DEBP1_MAYBEPUSH, DEBP1_PUSHED} DEBP1_state;
+static enum DEBP1_States {DEBP1_NOPUSH, DEBP1_MAYBENOPUSH, DEBP1_MAYBEPUSH, DEBP1_PUSHED} DEBP1_state;
 
 
-//void tickFct_DEBP1() {
-//    switch(DEBP1_state) {
-//        case DEBP1_NOPUSH:
-//            if (btn_listener()) {
-//                DEBP1_state = DEBP1_MAYBEPUSH;
-//            } else {
-//                DEBP1_state = DEBP1_NOPUSH;
-//            }
-//            break;
-//        case DEBP1_MAYBEPUSH:
-//            if (btn_listener()) {
-//                uint16_t x;
-//                uint16_t y;
-//                x=xpos;
-//                y=ypos;
-//                flag_button(x, y);
-//                DEBP1_state = DEBP1_PUSHED;
-//            } else {
-//                DEBP1_state = DEBP1_NOPUSH;
-//            }
-//            break;
-//        case DEBP1_PUSHED:
-//            if (btn_listener()) {
-//                DEBP1_state = DEBP1_PUSHED;
-//            } else {
-//                DEBP1_state = DEBP1_MAYBENOPUSH;
-//            }
-//            break;
-//        case DEBP1_MAYBENOPUSH:
-//            if (btn_listener()) {
-//                DEBP1_state = DEBP1_PUSHED;
-//            } else {
-//                DEBP1_state = DEBP1_NOPUSH;
-//            }
-//            break;
-//        default:
-//            DEBP1_state = DEBP1_NOPUSH;
-//            break;
-//    }
-//}
+void tickFct_DEBP1() {
+    switch(DEBP1_state) {
+        case DEBP1_NOPUSH:
+            if (btn_listener()) {
+                DEBP1_state = DEBP1_MAYBEPUSH;
+            } else {
+                DEBP1_state = DEBP1_NOPUSH;
+            }
+            break;
+        case DEBP1_MAYBEPUSH:
+            if (btn_listener()) {
+                uint16_t x;
+                uint16_t y;
+                x=xpos;
+                y=ypos;
+                flag_button(x, y);
+                DEBP1_state = DEBP1_PUSHED;
+            } else {
+                DEBP1_state = DEBP1_NOPUSH;
+            }
+            break;
+        case DEBP1_PUSHED:
+            if (btn_listener()) {
+                DEBP1_state = DEBP1_PUSHED;
+            } else {
+                DEBP1_state = DEBP1_MAYBENOPUSH;
+            }
+            break;
+        case DEBP1_MAYBENOPUSH:
+            if (btn_listener()) {
+                DEBP1_state = DEBP1_PUSHED;
+            } else {
+                DEBP1_state = DEBP1_NOPUSH;
+            }
+            break;
+        default:
+            DEBP1_state = DEBP1_NOPUSH;
+            break;
+    }
+}
 
 
 static enum calc_fsm_states {idle, enter_operand, op_mul, op_div, op_add, op_sub, result, clear, error} calc_state;
@@ -317,7 +317,6 @@ uint8_t r_flag = 0;
 uint8_t err_flag = 0;
 
 void tick_calc() {
-    btn_listener(); //each iteration through the tick function we listen for a button, if the button is pressed it will be flagged
     switch (calc_state) {
         case idle:
             if (btn_operand_listener()) {
@@ -339,10 +338,9 @@ void tick_calc() {
             break;
             
         case enter_operand:
-            if (curr_val > 100000000 || curr_val < -100000000 || err==1) {
-                if (!err == 1) err = 2;
-                    
-                    calc_state = error;
+            if (curr_val > 100000000 || curr_val < -100000000) {
+                err = 2;
+                calc_state = error;
             } else if (btn_clr) { 
                 calc_state = clear; 
             } else if (btn_operand_listener()) {
@@ -393,10 +391,11 @@ void tick_calc() {
                     }
                 }
                 
-                if (!err) calc_state = result;
-                else calc_state = error;
+                if (err) calc_state = error;
+                else calc_state = result;
                 
             } else if (btn_mul) {
+                btn_mul=0;
                 if (!first_val) {
                      r = curr_val;
                      first_val=1;
@@ -434,9 +433,11 @@ void tick_calc() {
                 strcat(display_str,"*"); //string concatenation
                 tft_writeString(display_str);
                 
-                if (!err) calc_state = op_mul;
+                if (err) calc_state = error;
+                else calc_state = op_mul;
             }
             else if (btn_div) {
+                btn_div=0;
                  if (!first_val) {
                      r = curr_val;
                      first_val=1;
@@ -474,9 +475,11 @@ void tick_calc() {
                 strcat(display_str,"/"); //string concatenation
                 tft_writeString(display_str);
                 
-                if (!err) calc_state = op_div;
+                if (err) calc_state = error;
+                else calc_state = op_div;
             }
             else if (btn_add) {
+                btn_add=0;
                  if (!first_val) {
                      r = curr_val;
                      first_val=1;
@@ -514,9 +517,11 @@ void tick_calc() {
                 strcat(display_str,"+"); //string concatenation
                 tft_writeString(display_str);
                 
-                if (!err) calc_state = op_add; 
+                if (err) calc_state = error;
+                else calc_state = op_add;
             }
             else if (btn_sub) {
+                btn_sub=0;
                  if (!first_val) {
                      r = curr_val;
                      first_val=1;
@@ -554,32 +559,31 @@ void tick_calc() {
                 strcat(display_str,"-"); //string concatenation
                 tft_writeString(display_str);
                 
-                if (!err) calc_state = op_sub;
+                if (err) calc_state = error;
+                else calc_state = op_sub;
+                
+                
             } else calc_state = enter_operand;
             break;
         case op_mul:
-            btn_mul = 0;
             mul_flag=1;
             
             if (btn_clr) calc_state = clear;
             else calc_state = idle;
             break;
         case op_div:
-            btn_div = 0;
             div_flag=1;
             
             if (btn_clr) calc_state = clear;
             else calc_state = idle;
             break;
         case op_add:
-            btn_add = 0;
             add_flag=1;
             
             if (btn_clr) calc_state = clear;
             else calc_state = idle;
             break;
         case op_sub:
-            btn_sub = 0;
             sub_flag=1;
             
             if (btn_clr) calc_state = clear;
@@ -588,6 +592,7 @@ void tick_calc() {
         case clear :
             btn_clr = 0;
             r=0;
+            curr_val = 0;
             first_val = 0;
             //write to calc screen
             tft_setCursor(0,0);
@@ -610,13 +615,11 @@ void tick_calc() {
                 else  tft_writeString("DIV0");
                 err_flag = 1;
             }
-            r=0;
             err = 0;
-            first_val = 0;
             if (btn_clr) { err_flag = 0;  calc_state = clear; }
+            else calc_state = error;
             break;
         case result: 
-            btn_eq = 0;
                 if (!r_flag) {
                     if (r > 100000000 || r < -100000000) {
                     err = 2;
@@ -639,6 +642,7 @@ void tick_calc() {
             first_val = 0;
             if (err == 2) calc_state = error;
             else if (btn_clr) { r_flag = 0; calc_state = clear; }
+            else calc_state = result;
             break;
     }
     
@@ -685,10 +689,10 @@ void main()
             ta1 = ta2;
             tick_calc();
         }
-//        if (timer1_ms_elapsed(tb1, tb2) >= PERIOD_DEB) {
-//          tb1 = tb2;
-//          tickFct_DEBP1();
-//        }
+        if (timer1_ms_elapsed(tb1, tb2) >= PERIOD_DEB) {
+          tb1 = tb2;
+          tickFct_DEBP1();
+        }
     }    
     
 }
