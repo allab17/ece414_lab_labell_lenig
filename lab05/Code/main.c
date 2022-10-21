@@ -343,7 +343,10 @@ static enum calc_fsm_states {idle, enter_operand, result, clear, error} calc_sta
 void tick_calc() {
     switch (calc_state) {
         case idle:
-            if (btn_operand_listener()) {
+            if (btn_clr) {
+                btn_clr=0;
+                calc_state = clear;
+            } else if (btn_operand_listener()) {
                 set_val(); //set the value corresponding to the operand
                 curr_val = val;
                 deflag_operand(); //deflag all operand buttons
@@ -411,19 +414,21 @@ void tick_calc() {
                     display_str[0] = '\0';
                     strcat(display_str,r_str); //string concatenation
                 
-                //write to calc screen
-                tft_setCursor(0,0);
-                tft_setTextColor2(ILI9341_WHITE,ILI9341_BLACK);
-                tft_drawRect(0,0,300,50,ILI9341_BLACK);
-                tft_fillRect(0,0,300,50,ILI9341_BLACK);
-                strcat(display_str,"*"); //string concatenation
-                tft_writeString(display_str);
                 
-                if (err) calc_state = error;
-                else if (btn_clr) {
+                if (r > 100000000 || r < -100000000 || err) {
+                    if (!err) err = 2;
+                    calc_state = error;
+                } else if (btn_clr) {
                     btn_clr=0; 
                     calc_state=clear;
                 } else {
+                    //write to calc screen
+                    tft_setCursor(0,0);
+                    tft_setTextColor2(ILI9341_WHITE,ILI9341_BLACK);
+                    tft_drawRect(0,0,300,50,ILI9341_BLACK);
+                    tft_fillRect(0,0,300,50,ILI9341_BLACK);
+                    strcat(display_str,"*"); //string concatenation
+                    tft_writeString(display_str);
                     calc_state = idle;
                     mul_flag=1;
                 }
@@ -438,19 +443,22 @@ void tick_calc() {
                     display_str[0] = '\0';
                     strcat(display_str,r_str); //string concatenation
                 
-                //write to calc screen
-                tft_setCursor(0,0);
-                tft_setTextColor2(ILI9341_WHITE,ILI9341_BLACK);
-                tft_drawRect(0,0,300,50,ILI9341_BLACK);
-                tft_fillRect(0,0,300,50,ILI9341_BLACK);
-                strcat(display_str,"/"); //string concatenation
-                tft_writeString(display_str);
                 
-                if (err) calc_state = error;
-                else if (btn_clr) {
+                
+                if (r > 100000000 || r < -100000000 || err) {
+                    if (!err) err = 2;
+                    calc_state = error;
+                } else if (btn_clr) {
                     btn_clr=0; 
                     calc_state=clear;
                 } else {
+                    //write to calc screen
+                    tft_setCursor(0,0);
+                    tft_setTextColor2(ILI9341_WHITE,ILI9341_BLACK);
+                    tft_drawRect(0,0,300,50,ILI9341_BLACK);
+                    tft_fillRect(0,0,300,50,ILI9341_BLACK);
+                    strcat(display_str,"/"); //string concatenation
+                    tft_writeString(display_str);
                     calc_state = idle;
                     div_flag=1;
                 }
@@ -465,19 +473,22 @@ void tick_calc() {
                     display_str[0] = '\0';
                     strcat(display_str,r_str); //string concatenation
                 
-                //write to calc screen
-                tft_setCursor(0,0);
-                tft_setTextColor2(ILI9341_WHITE,ILI9341_BLACK);
-                tft_drawRect(0,0,300,50,ILI9341_BLACK);
-                tft_fillRect(0,0,300,50,ILI9341_BLACK);
-                strcat(display_str,"+"); //string concatenation
-                tft_writeString(display_str);
                 
-                if (err) calc_state = error;
-                else if (btn_clr) {
+                
+                if (r > 100000000 || r < -100000000 || err) {
+                    if (!err) err = 2;
+                    calc_state = error;
+                } else if (btn_clr) {
                     btn_clr=0; 
                     calc_state=clear;
                 } else  {
+                    //write to calc screen
+                    tft_setCursor(0,0);
+                    tft_setTextColor2(ILI9341_WHITE,ILI9341_BLACK);
+                    tft_drawRect(0,0,300,50,ILI9341_BLACK);
+                    tft_fillRect(0,0,300,50,ILI9341_BLACK);
+                    strcat(display_str,"+"); //string concatenation
+                    tft_writeString(display_str);
                     calc_state = idle;
                     add_flag=1;
                 }
@@ -492,28 +503,32 @@ void tick_calc() {
                     display_str[0] = '\0';
                     strcat(display_str,r_str); //string concatenation
                 
-                //write to calc screen
-                tft_setCursor(0,0);
-                tft_setTextColor2(ILI9341_WHITE,ILI9341_BLACK);
-                tft_drawRect(0,0,300,50,ILI9341_BLACK);
-                tft_fillRect(0,0,300,50,ILI9341_BLACK);
-                strcat(display_str,"-"); //string concatenation
-                tft_writeString(display_str);
                 
-                if (err) calc_state = error;
-                else if (btn_clr) {
+                if (r > 100000000 || r < -100000000 || err) {
+                    if (!err) err = 2;
+                    calc_state = error;
+                } else if (btn_clr) {
                     btn_clr=0; 
                     calc_state=clear;
                 } else {
+                    //write to calc screen
+                    tft_setCursor(0,0);
+                    tft_setTextColor2(ILI9341_WHITE,ILI9341_BLACK);
+                    tft_drawRect(0,0,300,50,ILI9341_BLACK);
+                    tft_fillRect(0,0,300,50,ILI9341_BLACK);
+                    strcat(display_str,"-"); //string concatenation
+                    tft_writeString(display_str);
                     calc_state = idle;
                     sub_flag=1;
                 }
             } else calc_state = enter_operand;
             break;
         case clear :
+            btn_clr=0;
             r=0;
             curr_val = 0;
             first_val = 0;
+            deflag_operand();
             //write to calc screen
             tft_setCursor(0,0);
             tft_drawRect(0,0,300,50,ILI9341_BLACK);
@@ -552,6 +567,9 @@ void tick_calc() {
                     btn_clr=0;
                     r_flag = 0; 
                     calc_state = clear; 
+                } else if (btn_add || btn_sub || btn_mul || btn_div) {
+                    r_flag=0;
+                    calc_state = enter_operand;
                 } else {
                     if (!r_flag) {
                         display_str[0] = '\0';
@@ -568,7 +586,7 @@ void tick_calc() {
                         r_flag = 1;   
                     }
                     calc_state = result;
-                }  
+                } 
                     
             break;
     }
