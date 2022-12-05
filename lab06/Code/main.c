@@ -71,12 +71,23 @@ void tickFct_cntrl_fsm() {
             
             
             scaled_rpm_duty = (uint16_t) scale_input_cap(act_r_s);
-            oc2_setduty_plib(scaled_rpm_duty);
+            //oc2_setduty_plib(scaled_rpm_duty);
             
+            tft_setTextColor2(ILI9341_WHITE,ILI9341_BLACK);
+            tft_setCursor(0,270);
+            char b[50];
+            sprintf(b, "%f", act_r_s);
+            tft_writeString("current RPM:");
+            tft_writeString(b);
+            tft_setCursor(0,285);
+            char bf[50];
+            sprintf(bf, "%f", des_r_s);
+            tft_writeString("target RPM:");
+            tft_writeString(bf);
             
-            if (!set_f) {
-                printf("actual_rpm: %f, error: %f, deriv: %f, integ: %f, actuator: %f \n\r", act_r_s, err, deriv, integ, actuator);
-            }
+//            if (!set_f) {
+//                printf("actual_rpm: %f, error: %f, deriv: %f, integ: %f, actuator: %f \n\r", act_r_s, err, deriv, integ, actuator);
+//            }
             err = des_r_s - act_r_s;
             deriv = act_r_s - act_p_r_s;
             act_p_r_s = act_r_s;
@@ -104,36 +115,75 @@ void tickFct_cntrl_fsm() {
 
 static enum comm_states {idle, set_rot, set_kp, set_ki, set_kd} comm_state;
 
-char c[30];
+char c[5];
 int i;
 char cha;
+char buffer[50];
 
 void tickFct_comm_fsm() {
     switch(comm_state) {
-        case idle:
-            memset(c,0,100);
+        case idle:;
+            memset(c,0,5);
             i=0;
+            tft_setTextColor2(ILI9341_WHITE,ILI9341_BLACK);
+                tft_setCursor(0,300);
+                tft_writeString("s");
+                tft_setCursor(20,300);
+                sprintf(buffer, "%.6g", des_r_s);
+                tft_writeString(buffer);
+                tft_setCursor(100,300);
+                tft_writeString("p");
+                tft_setCursor(120,300);
+                sprintf(buffer, "%.6g", kp);
+                tft_writeString(buffer);
+                tft_setCursor(150,300);
+                tft_writeString("i");
+                tft_setCursor(170,300);
+                sprintf(buffer, "%.6g", ki);
+                tft_writeString(buffer);
+                tft_setCursor(200,300);
+                tft_writeString("d");
+                tft_setCursor(220,300);
+                sprintf(buffer, "%.6g", kd);
+                tft_writeString(buffer);
+            
             if (uart1_rxrdy()) {
                 cha = uart1_rxread();
                 if (cha == 's') {
                     cha = '\0';
                     comm_state = set_rot; 
                     uart1_txwrite('s');
+                    tft_setCursor(0,300);
+                    tft_drawRect(0,300,300,20,ILI9341_BLACK);
+                    tft_fillRect(0,300,300,20,ILI9341_BLACK);
+                    tft_writeString("s");
                     set_f = 1;
                 } else if (cha == 'p') {
                     cha = '\0';
                     comm_state = set_kp; 
                     uart1_txwrite('p');
+                    tft_setCursor(0,300);
+                     tft_drawRect(0,0,300,20,ILI9341_BLACK);
+                    tft_fillRect(0,0,300,20,ILI9341_BLACK);
+                    tft_writeString("p");
                     set_f = 1;
                 } else if (cha == 'i') {
                     cha = '\0';
                     comm_state = set_ki; 
                     uart1_txwrite('i');
+                    tft_setCursor(0,300);
+                    tft_drawRect(0,300,300,20,ILI9341_BLACK);
+                    tft_fillRect(0,300,300,20,ILI9341_BLACK);
+                    tft_writeString("i");
                     set_f = 1;
                 } else if (cha == 'd') {
                     cha = '\0';
                     comm_state = set_kd; 
                     uart1_txwrite('d');
+                    tft_setCursor(0,300);
+                    tft_drawRect(0,300,300,20,ILI9341_BLACK);
+                    tft_fillRect(0,300,300,20,ILI9341_BLACK);
+                    tft_writeString("d");
                     set_f = 1;
                 }
             } else comm_state = idle;
@@ -143,13 +193,19 @@ void tickFct_comm_fsm() {
                     cha = uart1_rxread();
                     if (cha == '\r') {
                         cha = '\0';
-                        comm_state = idle;
                         sscanf(c, "%f", &des_r_s);
-                        printf("desired set... value: %f", des_r_s);
+                        //printf("desired set... value: %f", des_r_s);
                         set_f = 0;
+                        comm_state = idle;
                     } else {
+                        tft_setTextColor2(ILI9341_WHITE,ILI9341_BLACK);
                         comm_state = set_rot;
                         c[i] = cha;
+                        tft_setCursor(0,300);
+                        tft_writeString("s");
+                        tft_setCursor(20,300);
+                        tft_writeString(c);
+                        uart1_txwrite(c[i]);
                         cha='\0';
                         i++;
                     }
@@ -160,13 +216,18 @@ void tickFct_comm_fsm() {
                 cha = uart1_rxread();
                 if (cha == '\r') {
                     cha = '\0';
-                    comm_state = idle;
                     sscanf(c, "%f", &kp);
-                    printf("proportional set... value: %f", kp);
+                    //printf("proportional set... value: %f", kp);
                     set_f = 0;
+                    comm_state = idle;
             } else {
                 comm_state = set_kp;
                 c[i] = cha;
+                tft_setCursor(0,300);
+                        tft_writeString("p");
+                        tft_setCursor(20,300);
+                        tft_writeString(c);
+                        uart1_txwrite(c[i]);
                 cha='\0';
                 i++;
             }
@@ -177,13 +238,18 @@ void tickFct_comm_fsm() {
                     cha = uart1_rxread();
                     if (cha == '\r') {
                         cha = '\0';
-                        comm_state = idle;
                         sscanf(c, "%f", &ki);
-                        printf("integral set... value: %f", ki);
+                        //printf("integral set... value: %f", ki);  
                         set_f = 0;
+                        comm_state = idle;
                     } else {
                         comm_state = set_ki;
                         c[i] = cha;
+                        tft_setCursor(0,300);
+                        tft_writeString("i");
+                        tft_setCursor(20,300);
+                        tft_writeString(c);
+                        uart1_txwrite(c[i]);
                         cha='\0';
                         i++;
                     }
@@ -194,13 +260,18 @@ void tickFct_comm_fsm() {
                     cha = uart1_rxread();
                     if (cha == '\r') {
                         cha = '\0';
-                        comm_state = idle;
                         sscanf(c, "%f", &kd);
-                        printf("derivative set... value: %f", kd);
+                        //printf("derivative set... value: %f", kd);
                         set_f = 0;
+                        comm_state = idle;
                     } else {
                         comm_state = set_kd;
                         c[i] = cha;
+                        tft_setCursor(0,300);
+                        tft_writeString("d");
+                        tft_setCursor(20,300);
+                        tft_writeString(c);
+                        uart1_txwrite(c[i]);
                         cha='\0';
                         i++;
                     }
@@ -262,7 +333,7 @@ int main() {
     //configureADC();
     tft_init_hw();
     tft_begin();
-    tft_setRotation(4);  // Landscape mode.  Use 1 for portrait.
+    tft_setRotation(2);  // Landscape mode.  Use 1 for portrait.
     tft_fillScreen(ILI9341_BLACK);
     
     uint16_t t1, t2;
@@ -276,18 +347,13 @@ int main() {
     t=0;
     set_f = 0;
     
-    
-//    des_r_s = 1500;
-//    kp = 100;
-//    ki = 25;
-//    kd = 50;
 
         uart1_init(9600);
         
         comm_state = idle;
         cntrl_state = init;
         
-    const uint16_t period_graph = 12.5;
+    const uint16_t period_graph = 5;
     uint16_t ta1,ta2;
     timer1_init();
     ta1 = timer1_read();
@@ -295,8 +361,9 @@ int main() {
      
     while (1) {
        ta2 = timer1_read();
+        tft_setTextSize(2);
              
-       
+        
         if (timer1_ms_elapsed(ta1, ta2) >= period_graph) {
             ta1 = ta2;
             draw_graph();
@@ -306,9 +373,6 @@ int main() {
             tickFct_cntrl_fsm();
             tickFct_comm_fsm();
         }
-        
-       
-
     }
 
 }
