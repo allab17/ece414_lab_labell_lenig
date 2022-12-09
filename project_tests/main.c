@@ -36,10 +36,11 @@ uint16_t step_c; //counting steps for stepper motor
 uint16_t s_c;   //counter for the servos
 const uint16_t t_z_ex = 181;  //timing to extend for 10ms period
 const uint16_t t_z_re = 231;  //timing to retract for 10ms period
+const uint16_t sensor_bias_t = 100; //should be about 1/4 to 1/2 what we need to retract
+const uint16_t sensor_bias_ex_t = 90;
 
-const uint16_t z_servo_ex_d = 1925; //3%   
-const uint16_t z_servo_re_d = 1776; //2.7%
-const uint16_t z_servo_mid_d = 1850;
+const uint16_t z_servo_ex_d = 1920; //3%   
+const uint16_t z_servo_re_d = 1650; //2.7%
 
 const uint16_t y_servo_d_h = 3000;  //25%
 const uint16_t y_servo_d_lo = 10000;  //5%
@@ -231,13 +232,6 @@ uint8_t get_empty_pos() {
     }
 }
 
-
-uint8_t restore_index() { //we need to loop through the entire array of items
-    if (num_items_s >= 0  && num_items_s <= 3) {
-        return num_items_s;
-    } return 0;
-}
-
 //methods used to draw the simulation on the lcd when the mechanical device is moving
 uint16_t scale(uint16_t val,uint16_t min, uint16_t max, uint16_t a, uint16_t b) {
     uint16_t scale;
@@ -245,7 +239,7 @@ uint16_t scale(uint16_t val,uint16_t min, uint16_t max, uint16_t a, uint16_t b) 
         return scale;
 }
 
-static enum asrs_states {idle, display_items, step, z_servo_ext, y_servo, z_servo_ret, y_servo_bias, step_home} asrs_state;
+static enum asrs_states {idle, display_items, step, bias_arm_ex, z_servo_ext, y_servo, bias_arm_re, z_servo_ret, y_servo_bias, step_home} asrs_state;
 
 void draw_simulation() {
         //scale the step count to screen size
@@ -313,16 +307,16 @@ void tickFct_asrs() {
                     //refresh screen
                     tft_fillScreen(ILI9341_BLACK);
                     //display s, r buttons
-     tft_drawRect(btn_s_x, btn_s_y, btn_s_w, 0.5*DH, ILI9341_WHITE);
-     tft_setCursor(btn_s_x,btn_s_y);
-     tft_setTextColor2(ILI9341_WHITE,ILI9341_BLACK);
-     tft_setTextSize(2);
-     tft_writeString("store");
-     tft_drawRect(btn_r_x, btn_r_y, btn_s_w, 0.5*DH, ILI9341_WHITE);
-     tft_setCursor(btn_r_x, btn_r_y);
-     tft_setTextColor2(ILI9341_WHITE,ILI9341_BLACK);
-     tft_setTextSize(2);
-     tft_writeString("retrieve");
+                    tft_drawRect(btn_s_x, btn_s_y, btn_s_w, 0.5*DH, ILI9341_WHITE);
+                    tft_setCursor(btn_s_x,btn_s_y);
+                    tft_setTextColor2(ILI9341_WHITE,ILI9341_BLACK);
+                    tft_setTextSize(2);
+                    tft_writeString("store");
+                    tft_drawRect(btn_r_x, btn_r_y, btn_s_w, 0.5*DH, ILI9341_WHITE);
+                    tft_setCursor(btn_r_x, btn_r_y);
+                    tft_setTextColor2(ILI9341_WHITE,ILI9341_BLACK);
+                    tft_setTextSize(2);
+                    tft_writeString("retrieve");
 
                     asrs_state = idle;
                 } else {
@@ -338,10 +332,18 @@ void tickFct_asrs() {
                                 empty_pos_index = get_empty_pos();
                                 step_x = pos[empty_pos_index].steps;
                                 items_in_sys_retrievable[empty_pos_index] = items_store[item_index];
-                                if (num_items_s>0) {
-                                    num_items_s--;
-                                    num_items_r++;
+                                num_items_s--;
+                                num_items_r++;
+                                
+                                if (item_index != num_items_s) {
+                                    int i;
+                                    for (i=0; i<num_items_s; i++) {
+                                        if (i >= item_index) {
+                                            items_store[i] = items_store[i+1];
+                                        }
+                                    }
                                 }
+                                
                                 pos[empty_pos_index].isEmpty = 0; //set the pos to be occupied so that we can not store anything there until we retrieve the item at that pos
                                 //we are ready to go to step state
                                 //refresh screen
@@ -358,7 +360,6 @@ void tickFct_asrs() {
                                 step_c = 0;
                                 //set DIR for storing
                                 LATBbits.LATB9 = 1;
-                                //LATBbits.LATB9 = 0;
                                 //enable stepper motor
                                 LATBbits.LATB15 = 0;
                             } else {
@@ -381,11 +382,20 @@ void tickFct_asrs() {
                                 //get the steps to get to the retrievable item
                                 //remove item from items_in_sys_re and add back to items_store
                                 step_x = pos[item_index].steps;
-                                items_store[restore_index()] = items_in_sys_retrievable[item_index];
-                                if (num_items_r > 0) {
-                                    num_items_r--;
-                                    num_items_s++;
-                                } 
+                                items_store[num_items_s] = items_in_sys_retrievable[item_index];
+                                    
+                                num_items_r--;
+                                num_items_s++;
+                                
+                                if (item_index != num_items_r) {
+                                    int i;
+                                    for (i=0; i<num_items_r; i++) {
+                                        if (i >= item_index) {
+                                            items_in_sys_retrievable[i] = items_in_sys_retrievable[i+1];
+                                        }
+                                    }
+                                }
+                                
                                 pos[item_index].isEmpty = 1; //we have retrieved item and thus the position is available for storage
                                 //refresh screen
                                 tft_fillScreen(ILI9341_BLACK);
@@ -402,7 +412,6 @@ void tickFct_asrs() {
                                 step_c = 0;
                                 //set DIR for storing
                                 LATBbits.LATB9 = 1;
-                                //LATBbits.LATB9 = 0;
                                 //enable stepper motor
                                 LATBbits.LATB15 = 0;
                         } else {
@@ -424,7 +433,7 @@ void tickFct_asrs() {
                 s_c = 0; //set the counter for z and y_servo to 0
                 oc1_setduty_plib(z_servo_ex_d);//set the duty cycle for the z_servo
                 
-                asrs_state = z_servo_ext;
+                asrs_state = bias_arm_ex;
             } else {
                 step_c++;
 
@@ -436,10 +445,20 @@ void tickFct_asrs() {
                 asrs_state = step;
             }
         break;
+        
+        case bias_arm_ex:
+            if (s_c >= sensor_bias_ex_t) {
+                asrs_state = z_servo_ext;
+            } else {
+                s_c++;
+                asrs_state = bias_arm_ex;
+            }
+        break;
+        
 
         case z_servo_ext:
-            if (s_c >= t_z_ex) {
-                oc1_setduty_plib(z_servo_mid_d);
+            if (!PORTBbits.RB13) {
+                oc1_setduty_plib(0);
                 s_c=0;
 
                 if (!sys_op) oc2_setduty_plib(y_servo_d_lo);  //we are storing, move y_servo down
@@ -449,31 +468,46 @@ void tickFct_asrs() {
 
                 asrs_state = y_servo;
             } else {
-                s_c++;
-
                 asrs_state = z_servo_ext;
             }
         break;
 
         case y_servo:
             if (s_c >= t_y) {
+                oc2_setduty_plib(0);
                 oc1_setduty_plib(z_servo_re_d);
                 s_c=0;
 
-                asrs_state = z_servo_ret;
+                asrs_state = bias_arm_re;
             } else {
                 s_c++;
                 asrs_state = y_servo;
             }
         break;
+        
+        case bias_arm_re:
+            if (s_c >= sensor_bias_t) {
+                oc2_setduty_plib(0);
+                oc1_setduty_plib(z_servo_re_d);
 
-        case z_servo_ret:
-            if (s_c >= t_z_re) { 
-                oc1_setduty_plib(z_servo_mid_d); //stop retracting, set the duty to be in between the two duty cycles
-                oc2_setduty_plib(y_servo_mid);//bias y_servo back to home postion
-                asrs_state = y_servo_bias;
+                asrs_state = z_servo_ret;
             } else {
                 s_c++;
+                asrs_state = bias_arm_re;
+            }
+        break;
+        
+        
+
+        case z_servo_ret:
+            if (!PORTBbits.RB13) { 
+                oc1_setduty_plib(0); //stop retracting, set the duty to be in between the two duty cycles
+                oc2_setduty_plib(y_servo_mid);//bias y_servo back to home position
+                asrs_state = y_servo_bias;
+                
+                s_c=0;
+            } else {
+                //we need some minute time delay before we start resampling so that we don't get a double tap of the sensor readout on the paint
                 asrs_state = z_servo_ret;
             }
         break;
@@ -484,8 +518,8 @@ void tickFct_asrs() {
 
                 //refresh the screen to clear the progress getting to pos
                 tft_fillScreen(ILI9341_BLACK);
-                oc1_setduty_plib(0x0000);
-                oc2_setduty_plib(0x0000);
+                oc1_setduty_plib(0);
+                oc2_setduty_plib(0);
                 asrs_state = step_home;
 
                 step_c = 0;
@@ -644,7 +678,9 @@ int main() {
     ANSELA = 0;
     ANSELB = 0;
     
-    TRISB = 0; 
+    TRISBbits.TRISB15 = 0;
+    TRISBbits.TRISB9 = 0;
+    TRISBbits.TRISB13 = 1;
     
     // Turn off comparator functions
     CM1CON = 0; 
@@ -685,7 +721,6 @@ int main() {
         }
     } 
 }
-
 
 
 
