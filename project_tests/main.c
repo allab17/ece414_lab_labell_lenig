@@ -312,7 +312,7 @@ void tickFct_asrs() {
                 }
                 
                 if (!sys_op && num_items_s == 0) {
-                    tft_setCursor(0,0.5*DH);
+                    tft_setCursor(5,0.5*DH-20);
                     tft_setTextColor(ILI9341_RED);
                     tft_setTextSize(2);
                     tft_writeString("System full...");
@@ -332,7 +332,7 @@ void tickFct_asrs() {
 
                     asrs_state = idle;
                 } else if (sys_op && num_items_r == 0) {
-                    tft_setCursor(0,0.5*DH);
+                    tft_setCursor(5,0.5*DH+5);
                     tft_setTextColor(ILI9341_RED);
                     tft_setTextSize(2);
                     tft_writeString("System empty...");
@@ -425,7 +425,7 @@ void tickFct_asrs() {
                                 //enable stepper motor
                                 LATBbits.LATB15 = 0;
                             } else {
-                                tft_setCursor(0,0.5*DH);
+                                tft_setCursor(5,0.5*DH-10);
                                 tft_drawRect(0,0,300,50,ILI9341_BLACK);
                                 tft_fillRect(0,0,300,50,ILI9341_BLACK);
                                 tft_setTextColor(ILI9341_RED);
