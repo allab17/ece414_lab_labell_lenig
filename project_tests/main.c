@@ -42,9 +42,8 @@ const uint16_t sensor_bias_ex_t = 90;
 const uint16_t z_servo_ex_d = 1920; //3%   
 const uint16_t z_servo_re_d = 1650; //2.7%
 
-const uint16_t y_servo_d_h = 3000;  //25%
-const uint16_t y_servo_d_lo = 10000;  //5%
-const uint16_t y_servo_mid = 5000;
+const uint16_t y_servo_d_h = 2500;  //25%
+const uint16_t y_servo_d_lo = 6000;  //5%
 const uint16_t t_y = 300;  //3 seconds for y_servo to finish
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -53,12 +52,13 @@ uint8_t num_items_r;
 
 struct Item {
     char name[50];
+    int pos;
 };
 
 struct Item items_store[3] = { 
-                        {"apples"}, 
-                        {"bananas"}, 
-                        {"pistacios"}  
+                        {"Apples"}, 
+                        {"Bananas"}, 
+                        {"Pistacios"}  
     
                   };
 
@@ -118,11 +118,11 @@ void init_button_dim() {
     btn_1_x = x_ref;
     btn_1_y = y_ref;  
     btn_2_x = x_ref;
-    btn_2_y = y_ref + 2*btn_s_h;
+    btn_2_y = y_ref + btn_s_h;
     btn_3_x = x_ref;
-    btn_3_y = y_ref + 3*btn_s_h;
+    btn_3_y = y_ref + 2*btn_s_h;
     btn_4_x = x_ref;
-    btn_4_y = y_ref + 4*btn_s_h;
+    btn_4_y = y_ref + 3*btn_s_h;
     btn_b_x = x_ref;
     btn_b_y = btn_s_h + DH;
 }
@@ -190,10 +190,9 @@ void print_items_store_lcd() {
     int i;
     for(i=0; i<num_items_s; i++) {
         uint16_t scale;
-        scale = i*btn_s_h;
+        scale = y_ref + i*btn_s_h;
             tft_drawRect(x_ref, scale, btn_s_w, btn_s_h, ILI9341_WHITE);
-            tft_fillRect(x_ref,scale,btn_s_w,btn_s_h,ILI9341_BLACK);
-            tft_setCursor(x_ref,scale*0.5);
+            tft_setCursor(x_ref, scale+5);
             tft_setTextColor2(ILI9341_WHITE,ILI9341_BLACK);
             tft_setTextSize(2);
             tft_writeString(items_store[i].name);
@@ -204,10 +203,9 @@ void print_items_in_sys_retrievable_lcd() {
     int i;
     for(i=0; i<num_items_r; i++) {
         uint16_t scale;
-        scale = i*btn_s_h;
+        scale = y_ref + i*btn_s_h;
             tft_drawRect(x_ref, scale, btn_s_w, btn_s_h, ILI9341_WHITE);
-            tft_fillRect(x_ref,scale,btn_s_w,btn_s_h,ILI9341_BLACK);
-            tft_setCursor(x_ref,scale);
+            tft_setCursor(x_ref,scale+5);
             tft_setTextColor2(ILI9341_WHITE,ILI9341_BLACK);
             tft_setTextSize(2);
             tft_writeString(items_in_sys_retrievable[i].name);
@@ -239,35 +237,58 @@ uint16_t scale(uint16_t val,uint16_t min, uint16_t max, uint16_t a, uint16_t b) 
         return scale;
 }
 
-static enum asrs_states {idle, display_items, step, bias_arm_ex, z_servo_ext, y_servo, bias_arm_re, z_servo_ret, y_servo_bias, step_home} asrs_state;
+static enum asrs_states {idle, display_items, step, step_bias, bias_arm_ex, z_servo_ext, y_servo, bias_arm_re, z_servo_ret, y_servo_bias, step_home, step_bias_home} asrs_state;
+
+void draw() {
+        uint16_t st_x;
+        //scale the target position to screen size 
+        st_x = scale(step_x, 0,2000,0,DW);
+        
+        tft_drawRect(st_x,0.5*DW,20,20,ILI9341_RED);
+        tft_fillRect(st_x,0.5*DW,20,20,ILI9341_RED);
+             
+        int i;
+        for (i=0; i<sizeof(pos); i++) {
+            uint16_t pos_s;
+            pos_s = scale(pos[i].steps, 0,2000,0,DW);
+            
+//            tft_drawRect(0,0.5*DW,20,20,ILI9341_BLUE);
+//            tft_fillRect(0,0.5*DW,20,20,ILI9341_BLUE);
+            
+            tft_drawRect(pos_s,0.5*DW,20,20,ILI9341_RED);
+            
+//            if (!pos[i].isEmpty) {
+//                //if the pos is not empty than we want to draw a blue square to represent the item
+//                tft_drawCircle(pos_s+9,0.5*DW+10,3,ILI9341_WHITE);
+//                tft_fillCircle(pos_s+9,0.5*DW+10,3,ILI9341_WHITE);
+//            }
+        }
+//    
+        tft_drawRect(0,0.5*DW,40,20,ILI9341_BLACK);
+        tft_fillRect(0,0.5*DW,40,20,ILI9341_BLACK);
+}
 
 void draw_simulation() {
         //scale the step count to screen size
         uint16_t st_c;
         uint16_t st_x;
-
-//        if (asrs_state == step_home) {
-            st_c = scale(step_c, 0,2000,0,DW);
-            //scale the target position to screen size 
-             st_x = scale(step_x, 0,2000,0,DW);
-//        } else {
-//            st_c = scale(step_c, 0,2000,0,DW);
-//            //scale the target position to screen size 
-//            st_x = scale(step_x, 0,2000,0,DW);
-//        }
+        st_c = scale(step_c, 0,2000,0,DW);
+        //scale the target position to screen size 
+        st_x = scale(step_x, 0,2000,0,DW);
         
-        tft_drawCircle(st_x,0.5*DW,1,ILI9341_BLUE);
-        tft_fillCircle(st_x,0.5*DW,1,ILI9341_BLUE);
-
-        tft_drawCircle(st_c,0.5*DW, 1, ILI9341_GREEN);
-        tft_fillCircle(st_c,0.5*DW, 1, ILI9341_GREEN);
-
-        tft_drawRect(st_x,0.5*DW,20,20,ILI9341_RED);
-        tft_fillRect(st_x,0.5*DW,20,20,ILI9341_RED); 
-
-        if (asrs_state == z_servo_ext) {
-            tft_drawLine(st_x, 0.5*DW, st_x, 0.5*DW+s_c, ILI9341_WHITE);
+        if (asrs_state == step_home) {
+            //moving from the rack position
+            tft_drawCircle(st_x + 9 - st_c,0.5*DW+20, 1, ILI9341_GREEN);
+            tft_fillCircle(st_x + 9 - st_c,0.5*DW+20, 1, ILI9341_GREEN);
+        } else {
+            //we are going to the rack position
+            tft_drawCircle(st_c+9,0.5*DW+20, 1, ILI9341_GREEN);
+            tft_fillCircle(st_c+9,0.5*DW+20, 1, ILI9341_GREEN);
         }
+        
+         tft_drawRect(0,0.2*DW,20,20,ILI9341_BLACK);
+        tft_fillRect(0,0.2*DW,20,20,ILI9341_BLACK);
+        
 }
 
 
@@ -279,9 +300,6 @@ void tickFct_asrs() {
                 //set sys_op depending on which was pressed
                 if (btn_s) sys_op = 0;
                 else sys_op = 1; 
-                tft_drawCircle(100,0.5*DW, 1, ILI9341_GREEN);
-                tft_fillCircle(100,0.5*DW, 1, ILI9341_GREEN);
-                
                 deflag();
                 
                 tft_fillScreen(ILI9341_BLACK);
@@ -293,7 +311,47 @@ void tickFct_asrs() {
                     print_items_in_sys_retrievable_lcd();
                 }
                 
-                asrs_state = display_items;
+                if (!sys_op && num_items_s == 0) {
+                    tft_setCursor(0,0.5*DH);
+                    tft_setTextColor(ILI9341_RED);
+                    tft_setTextSize(2);
+                    tft_writeString("System full...");
+                    
+                    
+                    //display s, r buttons
+                    tft_drawRect(btn_s_x, btn_s_y, btn_s_w, 0.5*DH, ILI9341_WHITE);
+                    tft_setCursor((btn_s_x + ((DW/2)-25)),(btn_s_y + (DH/4)-5));
+                    tft_setTextColor2(ILI9341_WHITE,ILI9341_BLACK);
+                    tft_setTextSize(2);
+                    tft_writeString("Store");
+                    tft_drawRect(btn_r_x, btn_r_y, btn_s_w, 0.5*DH, ILI9341_WHITE);
+                    tft_setCursor((btn_r_x + ((DW/2)-45)), (btn_r_y + (DH/4)-5));
+                    tft_setTextColor2(ILI9341_WHITE,ILI9341_BLACK);
+                    tft_setTextSize(2);
+                    tft_writeString("Retrieve");
+
+                    asrs_state = idle;
+                } else if (sys_op && num_items_r == 0) {
+                    tft_setCursor(0,0.5*DH);
+                    tft_setTextColor(ILI9341_RED);
+                    tft_setTextSize(2);
+                    tft_writeString("System empty...");
+                    
+                    
+                    //display s, r buttons
+                    tft_drawRect(btn_s_x, btn_s_y, btn_s_w, 0.5*DH, ILI9341_WHITE);
+                    tft_setCursor((btn_s_x + ((DW/2)-25)),(btn_s_y + (DH/4)-5));
+                    tft_setTextColor2(ILI9341_WHITE,ILI9341_BLACK);
+                    tft_setTextSize(2);
+                    tft_writeString("Store");
+                    tft_drawRect(btn_r_x, btn_r_y, btn_s_w, 0.5*DH, ILI9341_WHITE);
+                    tft_setCursor((btn_r_x + ((DW/2)-45)), (btn_r_y + (DH/4)-5));
+                    tft_setTextColor2(ILI9341_WHITE,ILI9341_BLACK);
+                    tft_setTextSize(2);
+                    tft_writeString("Retrieve");
+
+                    asrs_state = idle;
+                } else asrs_state = display_items;
             } else {
                 asrs_state = idle;
             }
@@ -308,15 +366,15 @@ void tickFct_asrs() {
                     tft_fillScreen(ILI9341_BLACK);
                     //display s, r buttons
                     tft_drawRect(btn_s_x, btn_s_y, btn_s_w, 0.5*DH, ILI9341_WHITE);
-                    tft_setCursor(btn_s_x,btn_s_y);
+                    tft_setCursor((btn_s_x + ((DW/2)-25)),(btn_s_y + (DH/4)-5));
                     tft_setTextColor2(ILI9341_WHITE,ILI9341_BLACK);
                     tft_setTextSize(2);
-                    tft_writeString("store");
+                    tft_writeString("Store");
                     tft_drawRect(btn_r_x, btn_r_y, btn_s_w, 0.5*DH, ILI9341_WHITE);
-                    tft_setCursor(btn_r_x, btn_r_y);
+                    tft_setCursor((btn_r_x + ((DW/2)-45)), (btn_r_y + (DH/4)-5));
                     tft_setTextColor2(ILI9341_WHITE,ILI9341_BLACK);
                     tft_setTextSize(2);
-                    tft_writeString("retrieve");
+                    tft_writeString("Retrieve");
 
                     asrs_state = idle;
                 } else {
@@ -324,14 +382,16 @@ void tickFct_asrs() {
                     deflag();
 
                     if (!sys_op) { //storing
-                        //if the index passed is greater than the size of the array, the user pressed beyond the scope of the array
-                        if (item_index < num_items_s && num_items_s != 0) {
+                        //if the index passed is greater than the size of the array, the user pressed beyond the scope of the array    
+                        if (item_index < num_items_s && item_index < sizeof(items_store) && num_items_s > 0) {
                             if (is_pos_free()) { //position free in the rack
                                 //get the steps that we need depending on the free positions steps field
                                 uint8_t empty_pos_index;
                                 empty_pos_index = get_empty_pos();
                                 step_x = pos[empty_pos_index].steps;
                                 items_in_sys_retrievable[empty_pos_index] = items_store[item_index];
+                                items_in_sys_retrievable[empty_pos_index].pos = empty_pos_index;
+                                
                                 num_items_s--;
                                 num_items_r++;
                                 
@@ -350,12 +410,14 @@ void tickFct_asrs() {
                                 tft_fillScreen(ILI9341_BLACK);
 
                                 tft_setCursor(0,0.5*DH);
-                                tft_drawRect(0,0,300,50,ILI9341_BLACK);
-                                tft_fillRect(0,0,300,50,ILI9341_BLACK);
                                 tft_setTextColor(ILI9341_WHITE);
                                 tft_setTextSize(2);
-                                tft_writeString("Standby... storing...");
+                                tft_writeString("Standby...storing...");
+                                
+                                draw();
 
+                                oc2_setduty_plib(y_servo_d_h);  //we are storing, move y_servo up at the start
+                                
                                 asrs_state = step;
                                 step_c = 0;
                                 //set DIR for storing
@@ -376,12 +438,15 @@ void tickFct_asrs() {
                             //no such item at the button press
                             asrs_state = display_items;
                         }
-                    } else { //user must have clicked retrieval
-                        //check if there is an item to retrieve at the index specified
-                        if (item_index < num_items_r && num_items_r != 0) { //the item index from the button press must be within bounds of retrievable array or not valid
+                    } else if (sys_op) { //user must have clicked retrieval
+                        //check if there is an item to retrieve at the index specified depending on the item pressed
+                        if (item_index < num_items_r && num_items_r > 0) { //the item index from the button press must be within bounds of retrievable array or not valid
                                 //get the steps to get to the retrievable item
                                 //remove item from items_in_sys_re and add back to items_store
-                                step_x = pos[item_index].steps;
+                                //get the index of the button press
+                                //get the item because the index reflects the item then look at the index field to get the actual position
+                            
+                                step_x = pos[items_in_sys_retrievable[item_index].pos].steps;
                                 items_store[num_items_s] = items_in_sys_retrievable[item_index];
                                     
                                 num_items_r--;
@@ -396,16 +461,18 @@ void tickFct_asrs() {
                                     }
                                 }
                                 
-                                pos[item_index].isEmpty = 1; //we have retrieved item and thus the position is available for storage
+                                pos[items_in_sys_retrievable[item_index].pos].isEmpty = 1; //we have retrieved item and thus the position is available for storage
                                 //refresh screen
                                 tft_fillScreen(ILI9341_BLACK);
 
                                 tft_setCursor(0,0.5*DH);
-                                tft_drawRect(0,0,300,50,ILI9341_BLACK);
-                                tft_fillRect(0,0,300,50,ILI9341_BLACK);
                                 tft_setTextColor(ILI9341_WHITE);
                                 tft_setTextSize(2);
-                                tft_writeString("Standby... retrieving...");
+                                tft_writeString("Standby...retrieving...");
+                                
+                                draw();
+                                
+                                 oc2_setduty_plib(y_servo_d_lo); //we are retrieving move y_servo down
                                 
                                 //now we mechanically retrieve
                                 asrs_state = step;
@@ -428,12 +495,8 @@ void tickFct_asrs() {
         //it with each tick as long as step_c < step_x
         case step:
             if (step_c >= step_x) {
-                //disable stepper
-                LATBbits.LATB15 = 1;
-                s_c = 0; //set the counter for z and y_servo to 0
-                oc1_setduty_plib(z_servo_ex_d);//set the duty cycle for the z_servo
                 
-                asrs_state = bias_arm_ex;
+                asrs_state = step_bias;
             } else {
                 step_c++;
 
@@ -445,6 +508,19 @@ void tickFct_asrs() {
                 asrs_state = step;
             }
         break;
+        
+        case step_bias:
+            if (!PORTBbits.RB10) {
+                //disable stepper
+                LATBbits.LATB15 = 1;
+                s_c=0;
+                oc1_setduty_plib(z_servo_ex_d);
+                
+                asrs_state = bias_arm_ex;
+            } else {
+                asrs_state = step_bias;
+            }
+            break;
         
         case bias_arm_ex:
             if (s_c >= sensor_bias_ex_t) {
@@ -502,7 +578,6 @@ void tickFct_asrs() {
         case z_servo_ret:
             if (!PORTBbits.RB13) { 
                 oc1_setduty_plib(0); //stop retracting, set the duty to be in between the two duty cycles
-                oc2_setduty_plib(y_servo_mid);//bias y_servo back to home position
                 asrs_state = y_servo_bias;
                 
                 s_c=0;
@@ -520,6 +595,16 @@ void tickFct_asrs() {
                 tft_fillScreen(ILI9341_BLACK);
                 oc1_setduty_plib(0);
                 oc2_setduty_plib(0);
+                
+                
+                tft_setCursor(0,0.5*DH);
+                tft_setTextColor(ILI9341_WHITE);
+                tft_setTextSize(2);
+                tft_writeString("Standby...bias home...");
+                
+                draw();
+                
+                
                 asrs_state = step_home;
 
                 step_c = 0;
@@ -540,27 +625,9 @@ void tickFct_asrs() {
 
         case step_home:
             if (step_c >= step_x) {
-                //disable stepper
-                LATBbits.LATB15 = 1;
                 step_c=0;
-                
-                
 
-                tft_fillScreen(ILI9341_BLACK);
-
-                //display s, r buttons
-     tft_drawRect(btn_s_x, btn_s_y, btn_s_w, 0.5*DH, ILI9341_WHITE);
-     tft_setCursor(btn_s_x,btn_s_y);
-     tft_setTextColor2(ILI9341_WHITE,ILI9341_BLACK);
-     tft_setTextSize(2);
-     tft_writeString("store");
-     tft_drawRect(btn_r_x, btn_r_y, btn_s_w, 0.5*DH, ILI9341_WHITE);
-     tft_setCursor(btn_r_x, btn_r_y);
-     tft_setTextColor2(ILI9341_WHITE,ILI9341_BLACK);
-     tft_setTextSize(2);
-     tft_writeString("retrieve");
-
-                asrs_state = idle;
+                asrs_state = step_bias_home;
             } else {
                 step_c++;
 
@@ -569,7 +636,33 @@ void tickFct_asrs() {
                 asrs_state = step_home;
             }
         break;
-    }
+        
+        case step_bias_home:
+            if (!PORTBbits.RB10) {
+                //disable stepper
+                LATBbits.LATB15 = 1;
+
+                tft_fillScreen(ILI9341_BLACK);
+
+                //display s, r buttons
+                    tft_drawRect(btn_s_x, btn_s_y, btn_s_w, 0.5*DH, ILI9341_WHITE);
+                    tft_setCursor((btn_s_x + ((DW/2)-25)),(btn_s_y + (DH/4)-5));
+                    tft_setTextColor2(ILI9341_WHITE,ILI9341_BLACK);
+                    tft_setTextSize(2);
+                    tft_writeString("Store");
+                    tft_drawRect(btn_r_x, btn_r_y, btn_s_w, 0.5*DH, ILI9341_WHITE);
+                    tft_setCursor((btn_r_x + ((DW/2)-45)), (btn_r_y + (DH/4)-5));
+                    tft_setTextColor2(ILI9341_WHITE,ILI9341_BLACK);
+                    tft_setTextSize(2);
+                    tft_writeString("Retrieve");
+
+                    asrs_state = idle;
+            } else {
+                asrs_state = step_bias_home;
+            }
+
+        break;
+    } 
 }
 
 static enum DEBP1_States {DEBP1_NOPUSH, DEBP1_MAYBENOPUSH, DEBP1_MAYBEPUSH, DEBP1_PUSHED} DEBP1_state;
@@ -626,13 +719,13 @@ void init() {
     //create each pos, with adequate steps to reach each
     struct Pos pos1; 
     pos1.isEmpty = 1;
-    pos1.steps = 612;
+    pos1.steps = 600;  //612
     struct Pos pos2;
     pos2.isEmpty = 1;
-    pos2.steps = 876;
+    pos2.steps = 800;  //876
     struct Pos pos3;
     pos3.isEmpty = 1;
-    pos3.steps = 1131;
+    pos3.steps = 1000;  //1131
 
     //add each pos to a pos array
     pos[0] = pos1;
@@ -660,15 +753,15 @@ void init() {
 
     //display s, r buttons
      tft_drawRect(btn_s_x, btn_s_y, btn_s_w, 0.5*DH, ILI9341_WHITE);
-     tft_setCursor(btn_s_x,btn_s_y);
+     tft_setCursor((btn_s_x + ((DW/2)-25)),(btn_s_y + (DH/4)-5));
      tft_setTextColor2(ILI9341_WHITE,ILI9341_BLACK);
      tft_setTextSize(2);
-     tft_writeString("store");
+     tft_writeString("Store");
      tft_drawRect(btn_r_x, btn_r_y, btn_s_w, 0.5*DH, ILI9341_WHITE);
-     tft_setCursor(btn_r_x, btn_r_y);
+     tft_setCursor((btn_r_x + ((DW/2)-45)), (btn_r_y + (DH/4)-5));
      tft_setTextColor2(ILI9341_WHITE,ILI9341_BLACK);
      tft_setTextSize(2);
-     tft_writeString("retrieve");
+     tft_writeString("Retrieve");
 }
 
 
